@@ -1,0 +1,252 @@
+Problem1: Employee who earns most in each department.
+Two tables employee and department which contains each contains. Two tables are joined by 
+by DepartmentID is foreign key in employee and id is the primary key in Department table.
+ANS:
+"""Select Department.Name as Department, Employee.Name as Employee ,
+Employee.Salary 
+From Employee
+Join Department ON Department.Id = Employee.DepartmentId
+Where (Employee.DepartmentID,Salary) IN (select DepartmentID, Max(Salary)
+From Employee
+Group by DepartmentId);"""
+
+Problem2: Find the n highest salary in the employee table
+
+Select Name, Salary
+From Employees
+Where Salary IN (Select Distinct Salary
+	              From Employees
+	              Order by Salary DESC
+	               LIMIT n)
+Order by Salary 
+LIMIT 1;
+
+OR
+
+SELECT DISTINCT salary,emp_name
+FROM employees
+ORDER BY salary DESC
+OFFSET 3
+FETCH NEXT 1 ROWS ONLY
+
+Problem 3: Find  the n lowest salary in the employee table
+
+SELECT NAME, SALARY 
+FROM employees 
+WHERE SALARY IN (SELECT DISTINCT Salary
+		 FROM employees
+		 Order by Salary 
+		 LIMIT N)
+ORDER BY SALARY DESC
+LIMIT 1;
+
+Problem 4: Find the average salary by job_name:
+
+Ans:
+SELECT job_name, AVG(salary)
+From employees
+GROUP BY job_name
+
+Problem 5: Find the name of the employees who joined the company on march
+
+Ans:
+Select name, hire_date
+From Employees
+Where to_char(hire_date, 'mon')='mar';
+
+
+Problem 5: Get the bar name and average price of drinks at each bar.
+
+menu_items: drink_id, bar, price
+orders: drink_id, bar, person, date, quantity
+Drinks: drink_id, type
+
+Ans: 
+SELECT bar, AVG(price)
+FROM menu_items
+GROUP BY bar
+
+Problem 6: Get the bars with the top 5 average prices.
+Ans:
+SELECT bars, AVG(price) AS Average_price
+FROM menu_items
+GROUP BY bar
+ORDER BY Average_price DESC
+LIMIT 5;
+
+Problem 7: Get the bar with the cheapest drink, along with the drink type and price.
+
+ANS:
+SELECT bar,drinks.type,price
+FROM menu_items
+JOIN drinks ON menu_items.drink_id = drinks.drink_id
+ORDER BY price ASC
+LIMIT 1;
+
+Problem 8: Get the number of beers sold by each bar in descending order (number of beers sold, not the number of beers on their menu).
+
+ANS:
+SELECT bar,SUM(quantity) as beer_sold
+FROM orders
+JOIN drinks ON orders.drink_id= drinks.drink_id
+WHERE drinks.type LIKE '%beer%'
+GROUP BY orders.bar
+ORDER BY beer_sold DESC;
+
+Problem 9:For each person, find the bar they visit, and the type(s) and price(s) of the drink(s) they drink during those visits.
+
+Ans:
+SELECT person, bar, type, price
+FROM  orders
+JOIN drinks ON drinks.drink_id= orders.drink_id
+JOIN menu_items ON menu_items.drink_id=orders.drink_id AND menu_items.bar=orders.bar
+GROUP BY  orders.person,orders.bar,drinks.type,menu_items.price;
+
+PROBLEM 10:(https://pgexercises.com/questions/updates/deletewh2.html) How can you produce a list of facilities, with each labelled as 'cheap' or 'expensive' depending on if their monthly maintenance cost is more than $100? 
+Return the name and monthly maintenance of the facilities in question.
+
+ANS: SELECT name, 
+	case when (monthlymaintenance >100) then 
+		'expensive'
+	else 
+		'cheap'
+	end as cost
+from cd.facilities
+
+problem 11:How can you produce a list of members who joined after the start of September 2012? Return the memid, surname, firstname, 
+and joindate of the members in question.
+
+ANS:
+ SELECT memid,surname,firstname,joindate
+FROM cd.members
+WHERE joindate>'2012-09-01'
+
+problem 12: for some reason, want a combined list of all surnames and all facility names. Yes, this is a contrived example 
+
+
+ANS:
+select surname FROM cd.members
+
+UNION
+
+SELECT name FROM cd.facilities
+
+problem 13:You'd like to get the signup date of your last member.
+ How can you retrieve this information?
+
+ANS:
+select MAX(joindate) from cd.members
+
+Problem 14:The club is adding a new facility - a spa. We need to add it into the facilities table. Use the following values:
+
+facid: 9, Name: 'Spa', membercost: 20, guestcost: 30, initialoutlay: 100000, monthlymaintenance: 800.
+
+ANS:
+INSERT INTO cd.facilities 
+VALUES(9,'Spa',20,30,100000,800)
+
+Problem 13: inserting multiple rows
+ ans:
+INSERT INTO cd.facilities
+VALUES
+(9,'Spa',20,30,100000,800),
+
+(10,'Squash Court 2',3.5,17.5,5000,80)
+
+Problem 15:Let's try adding the spa to the facilities table again. 
+This time, though, we want to automatically generate the value for the next facid, rather than specifying it as a constant. Use the following values for everything else:
+
+Name: 'Spa', membercost: 20, guestcost: 30, initialoutlay: 100000, monthlymaintenance: 800.
+
+ANS:
+INSERT INTO cd.facilities
+VALUES
+((SELECT MAX(facid) FROM cd.facilities)+1,'Spa',20,30,100000,800)
+
+Problem 16:We made a mistake when entering the data for the second tennis court. The initial outlay was 10000 rather than 8000:
+ you need to alter the data to fix the error.
+
+ANS:
+UPDATE cd.facilities
+SET initialoutlay=10000
+WHERE initialoutlay=8000
+
+Problem 17:We want to increase the price of the tennis courts for both members and guests. Update the costs to be 6 for members, 
+and 30 for guests.
+
+ANS:
+UPDATE cd.facilities 
+SET membercost=6,guestcost=30
+WHERE facid IN (0,1)
+##Note: set clause accepts a comma separated list of values that you want to update
+
+We want to increase the price of the tennis courts for both members and guests. Update the costs to be 6 for members, and 30 for guests.
+
+Problem 18:We want to alter the price of the second tennis court so that it costs 10% more than the first one. Try to do this without using constant values for the prices, 
+so that we can reuse the statement if we want to.
+
+ANS:
+UPDATE cd.facilities 
+SET 
+	membercost=(SELECT membercost*1.1 FROM cd.facilities WHERE facid=0),
+	guestcost=(SELECT guestcost*1.1 FROM cd.facilities WHERE facid=0)
+WHERE facid=1
+
+Problem 19: Delete all the records of table
+
+ANS:DELETE FROM cd.bookings
+
+OR Truncate cd.bookings
+
+Problem 19: We want to remove member 37, who has never made a booking, from our database. How can we achieve that?
+
+Ans:
+DELETE FROM cd.members
+WHERE memid=37
+
+Problem 20:In our previous exercises, we deleted a specific member who had never made a booking. How can we make that more general, to delete all members who have never made a booking?
+
+Ans:
+DELETE FROM cd.members
+WHERE memid NOT IN (SELECT memid FROM cd.bookings)
+
+Problem 21:Produce a timestamp for 1 a.m. on the 31st of August 2012.
+
+ANS:
+SELECT timestamp '2012-08-31 01:00:00'
+
+Problem 22:Find the result of subtracting the timestamp '2012-07-30 01:00:00' from the timestamp '2012-08-31 01:00:00'
+
+ans:Select timestamp '2012-08-31 01:00:00' -timestamp '2012-07-30 01:00:00' as interval
+
+Problem 23:Produce a list of all the dates in October 2012. They can be output as a timestamp (with time set to midnight) or a date.
+
+Ans:SELECT generate_series(TIMESTAMP '2012-10-01', TIMESTAMP '2012-10-31', interval '1 day') as ts
+
+Problem 24:
+Extract day of the month from timestamp
+
+ans:SELECT extract(day from timestamp '2012-08-31')
+
+Problem 25: Extract seconds between two timestamps
+
+ANS: select extract(epoch from (timestamp '2012-09-02 00:00:00' - '2012-08-31 01:00:00'))
+
+Problem 26:For each month of the year in 2012, output the number of days in that month. Format the output as an integer column containing the month of the year, and
+ a second column containing an interval data type.
+
+Ans:
+select extract(month from cal.month) as month,
+		(cal.month + interval '1 month')- cal.month as length
+		from
+		(
+		  select generate_series(timestamp '2012-01-01', timestamp '2012-12-31', interval '1 month') as month 
+		 ) cal
+order by month;
+
+Problem 27: Remaining days from the date
+
+Ans:
+select (date_trunc('month',ts.testts) +interval '1 month')
+			-date_trunc('day',ts.testts) as remaining
+from (select timestamp '2012-02-11 01:00:00' as testts)ts
