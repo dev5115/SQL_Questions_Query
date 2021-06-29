@@ -3,7 +3,7 @@ SQL Questions and Answers . It ranges from beginners to Advanced
 
 It will definitely help the data analyst interviews.
 
-For this project I have used the postgresql.
+For this project I have used postgresql.
 
 Sites I have referred for this project links are provided below:
 
