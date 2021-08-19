@@ -1,7 +1,7 @@
-# SQL_Questions_Query
-SQL Questions and Answers . It ranges from beginners to Advanced
 
-It will definitely help the data analyst interviews.
+## SQL Questions and Answers
+
+It ranges from beginners to Advanced
 
 For this project I have used postgresql.
 
